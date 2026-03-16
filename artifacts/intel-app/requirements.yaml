@@ -1,0 +1,15 @@
+packages:
+  "framer-motion": "For smooth transitions and accordion animations"
+  "date-fns": "For formatting timestamps in history and results"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility function to efficiently merge Tailwind CSS classes"
+  "lucide-react": "For UI icons"
+
+images:
+  - path: "artifacts/intel-app/public/images/cyber-bg.png"
+    description: "Abstract dark cybersecurity background with glowing cyan data streams, tech grid, dark mode, hacker aesthetic, minimal"
+    aspect_ratio: "16:9"
+
+notes:
+  - Using generated hooks from @workspace/api-client-react for data fetching
+  - PDF export relies on standard browser window.print() and Tailwind print:* modifiers

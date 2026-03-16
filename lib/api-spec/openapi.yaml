@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Intelligence Analyzer API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: analyze
+    description: OSINT analysis operations
 paths:
   /healthz:
     get:
@@ -24,6 +25,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /analyze:
+    post:
+      operationId: runAnalysis
+      tags: [analyze]
+      summary: Run OSINT analysis
+      description: Run intelligence analysis on an IP, URL, email, or phone number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalysisRequest"
+      responses:
+        "200":
+          description: Analysis results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /analyze/history:
+    get:
+      operationId: getAnalysisHistory
+      tags: [analyze]
+      summary: Get analysis history
+      description: Get the last N analyses performed
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: History list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AnalysisHistoryItem"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +90,84 @@ components:
       required:
         - status
 
+    AnalysisRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [ip, url, email, phone]
+          description: Type of analysis to run
+        target:
+          type: string
+          description: The value to analyze (IP address, URL, email, or phone number)
+      required:
+        - type
+        - target
+
+    ModuleResult:
+      type: object
+      properties:
+        module:
+          type: string
+        status:
+          type: string
+          enum: [success, error, skipped]
+        output:
+          type: ["string", "null"]
+        error:
+          type: ["string", "null"]
+      required:
+        - module
+        - status
+
+    AnalysisResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        target:
+          type: string
+        modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModuleResult"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - target
+        - modules
+        - createdAt
+
+    AnalysisHistoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        target:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        moduleCount:
+          type: integer
+      required:
+        - id
+        - type
+        - target
+        - createdAt
+        - moduleCount
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
