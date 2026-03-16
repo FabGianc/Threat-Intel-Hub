@@ -1,0 +1,59 @@
+Ecco la guida completa per Ubuntu:
+
+1. Aggiorna il sistema
+
+sudo apt update && sudo apt upgrade -y
+2. Installa Node.js 20+
+
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+node --version  # verifica
+3. Installa pnpm
+
+npm install -g pnpm
+4. Installa Python e dipendenze
+
+sudo apt install -y python3 python3-pip
+pip3 install requests
+5. Installa PostgreSQL
+
+sudo apt install -y postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+Crea il database:
+
+sudo -u postgres psql -c "CREATE DATABASE intel_app;"
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'tuapassword';"
+6. Clona il progetto e installa le dipendenze Node
+
+git clone https://github.com/TUO_UTENTE/TUO_REPO.git
+cd TUO_REPO
+pnpm install
+7. Crea il file .env
+Nella cartella artifacts/api-server/ crea il file .env:
+
+cat > artifacts/api-server/.env << 'EOF'
+DATABASE_URL=postgresql://postgres:tuapassword@localhost:5432/intel_app
+PORT=8080
+VIRUSTOTAL_API_KEY=...
+URLSCAN_API_KEY=...
+ABUSEIPDB_API_KEY=...
+IPINFO_ACCESS_TOKEN=...
+OSINT_INDUSTRIES_API_KEY=...
+ISC_SANS_API_KEY=...
+EOF
+8. Push dello schema del database
+
+pnpm --filter @workspace/db run push
+9. Avvia i due servizi (in due terminali separati)
+
+Terminale 1 — Backend:
+
+pnpm --filter @workspace/api-server run dev
+Terminale 2 — Frontend:
+
+pnpm --filter @workspace/intel-app run dev
+Apri il browser su http://localhost:23825
+
+Nota sul .env: il backend deve leggere il file .env. Se le variabili non vengono caricate, dimmi e aggiungo il supporto direttamente nel codice.
+
