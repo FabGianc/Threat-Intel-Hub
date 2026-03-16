@@ -1,0 +1,45 @@
+Per eseguire l'app su Windows 11, hai bisogno di installare alcune dipendenze e configurare il database. Ecco i passaggi completi:
+
+1. Installa i prerequisiti
+
+Node.js 20+: scarica da nodejs.org
+pnpm: apri il terminale e lancia npm install -g pnpm
+Python 3.10+: scarica da python.org (spunta "Add to PATH")
+PostgreSQL: scarica da postgresql.org
+2. Installa le dipendenze Python
+
+pip install requests
+3. Installa le dipendenze Node
+Nella cartella del progetto:
+
+pnpm install
+4. Configura le variabili d'ambiente
+Crea un file .env nella cartella artifacts/api-server/ con:
+
+DATABASE_URL=postgresql://postgres:TUA_PASSWORD@localhost:5432/intel_app
+PORT=8080
+VIRUSTOTAL_API_KEY=...
+URLSCAN_API_KEY=...
+ABUSEIPDB_API_KEY=...
+IPINFO_ACCESS_TOKEN=...
+OSINT_INDUSTRIES_API_KEY=...
+ISC_SANS_API_KEY=...
+5. Crea il database PostgreSQL
+Apri pgAdmin o psql e lancia:
+
+CREATE DATABASE intel_app;
+Poi fai il push dello schema:
+
+pnpm --filter @workspace/db run push
+6. Avvia i due servizi (in due terminali separati)
+
+Terminale 1 — Backend:
+
+pnpm --filter @workspace/api-server run dev
+Terminale 2 — Frontend:
+
+pnpm --filter @workspace/intel-app run dev
+Apri il browser su http://localhost:23825 (o la porta mostrata nel terminale del frontend).
+
+Nota: il file .env va caricato dal server Express. Se l'app non legge le variabili, 
+installa dotenv e aggiungilo all'inizio di artifacts/api-server/src/index.ts con import 'dotenv/config'
