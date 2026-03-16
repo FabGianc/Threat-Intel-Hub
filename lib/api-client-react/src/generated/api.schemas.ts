@@ -20,12 +20,17 @@ export const AnalysisRequestType = {
   url: "url",
   email: "email",
   phone: "phone",
+  account: "account",
+  person: "person",
+  eth: "eth",
+  btc: "btc",
+  trc: "trc",
 } as const;
 
 export interface AnalysisRequest {
   /** Type of analysis to run */
   type: AnalysisRequestType;
-  /** The value to analyze (IP address, URL, email, or phone number) */
+  /** The value to analyze */
   target: string;
 }
 

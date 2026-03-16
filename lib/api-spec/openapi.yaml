@@ -31,7 +31,7 @@ paths:
       operationId: runAnalysis
       tags: [analyze]
       summary: Run OSINT analysis
-      description: Run intelligence analysis on an IP, URL, email, or phone number
+      description: Run intelligence analysis on a target
       requestBody:
         required: true
         content:
@@ -95,11 +95,20 @@ components:
       properties:
         type:
           type: string
-          enum: [ip, url, email, phone]
+          enum:
+            - ip
+            - url
+            - email
+            - phone
+            - account
+            - person
+            - eth
+            - btc
+            - trc
           description: Type of analysis to run
         target:
           type: string
-          description: The value to analyze (IP address, URL, email, or phone number)
+          description: The value to analyze
       required:
         - type
         - target

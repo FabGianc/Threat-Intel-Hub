@@ -16,16 +16,24 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
- * Run intelligence analysis on an IP, URL, email, or phone number
+ * Run intelligence analysis on a target
  * @summary Run OSINT analysis
  */
 export const RunAnalysisBody = zod.object({
   type: zod
-    .enum(["ip", "url", "email", "phone"])
+    .enum([
+      "ip",
+      "url",
+      "email",
+      "phone",
+      "account",
+      "person",
+      "eth",
+      "btc",
+      "trc",
+    ])
     .describe("Type of analysis to run"),
-  target: zod
-    .string()
-    .describe("The value to analyze (IP address, URL, email, or phone number)"),
+  target: zod.string().describe("The value to analyze"),
 });
 
 export const RunAnalysisResponse = zod.object({

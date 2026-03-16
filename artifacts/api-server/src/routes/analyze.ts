@@ -15,10 +15,15 @@ const execAsync = promisify(exec);
 const router: IRouter = Router();
 
 const MODULE_MAP: Record<string, string[]> = {
-  ip: ["virustotal", "abuseipdb", "ip_to_geo", "isc_sans"],
-  url: ["virustotal", "urlscan"],
-  email: ["osint_indistries"],
-  phone: ["osint_indistries"],
+  ip:      ["virustotal", "abuseipdb", "ip_to_geo", "isc_sans"],
+  url:     ["virustotal", "urlscan"],
+  email:   ["osint_indistries"],
+  phone:   ["osint_indistries"],
+  account: ["osint_indistries"],
+  person:  ["osint_indistries"],
+  eth:     ["osint_indistries"],
+  btc:     ["osint_indistries"],
+  trc:     ["osint_indistries"],
 };
 
 const PDF_PREFIX = "PDF_BASE64:";

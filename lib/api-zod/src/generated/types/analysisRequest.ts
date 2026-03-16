@@ -10,6 +10,6 @@ import type { AnalysisRequestType } from "./analysisRequestType";
 export interface AnalysisRequest {
   /** Type of analysis to run */
   type: AnalysisRequestType;
-  /** The value to analyze (IP address, URL, email, or phone number) */
+  /** The value to analyze */
   target: string;
 }

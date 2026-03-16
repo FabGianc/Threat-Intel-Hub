@@ -111,7 +111,7 @@ export function useHealthCheck<
 }
 
 /**
- * Run intelligence analysis on an IP, URL, email, or phone number
+ * Run intelligence analysis on a target
  * @summary Run OSINT analysis
  */
 export const getRunAnalysisUrl = () => {

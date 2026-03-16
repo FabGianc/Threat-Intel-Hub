@@ -17,4 +17,9 @@ export const AnalysisRequestType = {
   url: "url",
   email: "email",
   phone: "phone",
+  account: "account",
+  person: "person",
+  eth: "eth",
+  btc: "btc",
+  trc: "trc",
 } as const;

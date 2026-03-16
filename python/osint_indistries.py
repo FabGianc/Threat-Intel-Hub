@@ -3,8 +3,19 @@ import sys
 import os
 import base64
 
+OSINT_TYPE_MAP = {
+    "email":   "email",
+    "phone":   "phone",
+    "account": "account",
+    "person":  "name",
+    "eth":     "ethereum",
+    "btc":     "bitcoin",
+    "trc":     "tron",
+}
+
 def query_osint_industries_pdf(query_type, query_value, api_key, timeout=60):
-    url = f'https://api.osint.industries/v2/request?type={query_type}&query={query_value}&timeout={timeout}'
+    osint_type = OSINT_TYPE_MAP.get(query_type, query_type)
+    url = f'https://api.osint.industries/v2/request?type={osint_type}&query={query_value}&timeout={timeout}'
     headers = {
         'accept': 'application/pdf',
         'api-key': api_key
