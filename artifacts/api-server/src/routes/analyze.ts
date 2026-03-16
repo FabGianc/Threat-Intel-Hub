@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { db, analysesTable } from "@workspace/db";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import {
   RunAnalysisBody,
   GetAnalysisHistoryQueryParams,
@@ -21,6 +21,8 @@ const MODULE_MAP: Record<string, string[]> = {
   phone: ["osint_indistries"],
 };
 
+const PDF_PREFIX = "PDF_BASE64:";
+
 async function runPythonModule(
   moduleName: string,
   target: string,
@@ -30,21 +32,23 @@ async function runPythonModule(
     const scriptPath = `/home/runner/workspace/python/${moduleName}.py`;
     const { stdout, stderr } = await execAsync(
       `python3 "${scriptPath}" "${target}" "${analysisType}"`,
-      { timeout: 60000 }
+      { timeout: 90000, maxBuffer: 50 * 1024 * 1024 }
     );
+    const out = stdout.trim();
     return {
       module: moduleName,
       status: "success",
-      output: stdout || null,
+      output: out || null,
       error: stderr && stderr.trim() ? stderr.trim() : null,
     };
   } catch (err: unknown) {
     const error = err as { stdout?: string; stderr?: string; message?: string };
-    if (error.stdout && error.stdout.trim()) {
+    const out = error.stdout ? error.stdout.trim() : "";
+    if (out) {
       return {
         module: moduleName,
         status: "success",
-        output: error.stdout.trim(),
+        output: out,
         error: null,
       };
     }
@@ -119,6 +123,42 @@ router.get("/analyze/history", async (req, res): Promise<void> => {
 
   const result = GetAnalysisHistoryResponse.parse(history);
   res.json(result);
+});
+
+router.get("/analyze/:id/pdf/:module", async (req, res): Promise<void> => {
+  const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const moduleName = Array.isArray(req.params.module) ? req.params.module[0] : req.params.module;
+  const id = parseInt(rawId, 10);
+
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid ID" });
+    return;
+  }
+
+  const [row] = await db
+    .select()
+    .from(analysesTable)
+    .where(eq(analysesTable.id, id));
+
+  if (!row) {
+    res.status(404).json({ error: "Analysis not found" });
+    return;
+  }
+
+  const mods = Array.isArray(row.modules) ? row.modules : [];
+  const mod = mods.find((m: { module: string; output?: string | null }) => m.module === moduleName);
+
+  if (!mod || !mod.output || !mod.output.startsWith(PDF_PREFIX)) {
+    res.status(404).json({ error: "PDF not found for this module" });
+    return;
+  }
+
+  const b64 = mod.output.slice(PDF_PREFIX.length);
+  const pdfBuffer = Buffer.from(b64, "base64");
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename="osint_${row.target}_${moduleName}.pdf"`);
+  res.send(pdfBuffer);
 });
 
 export default router;

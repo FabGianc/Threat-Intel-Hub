@@ -15,9 +15,9 @@ export function AnalysisResultView({ result }: AnalysisResultViewProps) {
 
   const successCount = result.modules.filter(m => m.status === 'success').length;
   const errorCount = result.modules.filter(m => m.status === 'error').length;
-  
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -26,7 +26,7 @@ export function AnalysisResultView({ result }: AnalysisResultViewProps) {
       {/* Result Header */}
       <div className="bg-card border border-border p-6 sm:p-8 rounded-2xl shadow-xl relative overflow-hidden print:border-gray-300 print:shadow-none print:bg-white print:text-black">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary print:hidden" />
-        
+
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2 text-primary print:text-black">
@@ -51,7 +51,7 @@ export function AnalysisResultView({ result }: AnalysisResultViewProps) {
               </div>
             </div>
           </div>
-          
+
           <button
             onClick={handlePrint}
             className="print-hidden shrink-0 flex items-center gap-2 px-6 py-3 bg-secondary/10 text-secondary border border-secondary/30 hover:bg-secondary hover:text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-secondary/25"
@@ -68,13 +68,14 @@ export function AnalysisResultView({ result }: AnalysisResultViewProps) {
           <span className="w-1.5 h-6 bg-secondary rounded-full inline-block print:hidden" />
           Module Execution Results
         </h3>
-        
+
         <div className="grid gap-4 print:block">
           {result.modules.map((module, idx) => (
-            <ModuleAccordion 
-              key={`${module.module}-${idx}`} 
-              module={module} 
-              defaultOpen={module.status !== 'skipped'} // Open successes and errors by default
+            <ModuleAccordion
+              key={`${module.module}-${idx}`}
+              module={module}
+              analysisId={result.id}
+              defaultOpen={module.status !== 'skipped'}
             />
           ))}
         </div>
