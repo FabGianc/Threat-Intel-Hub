@@ -1,5 +1,7 @@
 import { Router, type IRouter } from "express";
-import { exec } from "child_process";
+import { execFile } from "child_process";
+import { existsSync } from "fs";
+import path from "path";
 import { promisify } from "util";
 import { db, analysesTable } from "@workspace/db";
 import { desc, eq } from "drizzle-orm";
@@ -10,7 +12,20 @@ import {
   GetAnalysisHistoryResponse,
 } from "@workspace/api-zod";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+
+// Cartella degli script Python: configurabile, altrimenti <radice repo>/python.
+// In sviluppo il backend parte da artifacts/api-server, in produzione dalla radice.
+const PYTHON_SCRIPTS_DIR =
+  process.env["PYTHON_SCRIPTS_DIR"] ??
+  [
+    path.resolve(process.cwd(), "python"),
+    path.resolve(process.cwd(), "..", "..", "python"),
+  ].find((dir) => existsSync(path.join(dir, "virustotal.py"))) ??
+  path.resolve(process.cwd(), "..", "..", "python");
+const PYTHON_BIN =
+  process.env["PYTHON_BIN"] ??
+  (process.platform === "win32" ? "python" : "python3");
 
 const router: IRouter = Router();
 
@@ -34,10 +49,13 @@ async function runPythonModule(
   analysisType: string
 ): Promise<{ module: string; status: string; output: string | null; error: string | null }> {
   try {
-    const scriptPath = `/home/runner/workspace/python/${moduleName}.py`;
-    const { stdout, stderr } = await execAsync(
-      `python3 "${scriptPath}" "${target}" "${analysisType}"`,
-      { timeout: 90000, maxBuffer: 50 * 1024 * 1024 }
+    const scriptPath = path.join(PYTHON_SCRIPTS_DIR, `${moduleName}.py`);
+    // execFile senza shell: target e tipo arrivano allo script come argomenti
+    // letterali, quindi caratteri come $( ) ; | ` non vengono mai interpretati
+    const { stdout, stderr } = await execFileAsync(
+      PYTHON_BIN,
+      [scriptPath, target, analysisType],
+      { timeout: 90000, maxBuffer: 50 * 1024 * 1024, shell: false }
     );
     const out = stdout.trim();
     return {
@@ -162,7 +180,8 @@ router.get("/analyze/:id/pdf/:module", async (req, res): Promise<void> => {
   const pdfBuffer = Buffer.from(b64, "base64");
 
   res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename="osint_${row.target}_${moduleName}.pdf"`);
+  const safeName = `osint_${row.target}_${moduleName}`.replace(/[^A-Za-z0-9@._+-]/g, "_");
+  res.setHeader("Content-Disposition", `attachment; filename="${safeName}.pdf"`);
   res.send(pdfBuffer);
 });
 

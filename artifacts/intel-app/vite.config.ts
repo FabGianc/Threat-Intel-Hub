@@ -4,27 +4,21 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-const rawPort = process.env.PORT;
+// Su Replit PORT e BASE_PATH sono forniti dall'ambiente; in locale si usano i default
+const isReplit = process.env.REPL_ID !== undefined;
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
+const rawPort = process.env.PORT ?? "23825";
 const port = Number(rawPort);
 
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-const basePath = process.env.BASE_PATH;
+const basePath = process.env.BASE_PATH ?? "/";
 
-if (!basePath) {
-  throw new Error(
-    "BASE_PATH environment variable is required but was not provided.",
-  );
-}
+// In locale il dev server inoltra /api al backend Express
+const apiTarget = process.env.API_URL ?? "http://127.0.0.1:8080";
+const host = isReplit ? "0.0.0.0" : "localhost";
 
 export default defineConfig({
   base: basePath,
@@ -60,8 +54,9 @@ export default defineConfig({
   },
   server: {
     port,
-    host: "0.0.0.0",
-    allowedHosts: true,
+    host,
+    allowedHosts: isReplit ? true : undefined,
+    proxy: isReplit ? undefined : { "/api": apiTarget },
     fs: {
       strict: true,
       deny: ["**/.*"],
@@ -69,7 +64,8 @@ export default defineConfig({
   },
   preview: {
     port,
-    host: "0.0.0.0",
-    allowedHosts: true,
+    host,
+    allowedHosts: isReplit ? true : undefined,
+    proxy: isReplit ? undefined : { "/api": apiTarget },
   },
 });
