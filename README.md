@@ -136,6 +136,7 @@ Tipi ammessi: `ip`, `url`, `email`, `phone`, `account`, `person`, `eth`, `btc`, 
 - Il backend **non ha autenticazione**: in sviluppo ascolta solo su `127.0.0.1`. Non esporlo su Internet senza un livello di autenticazione davanti (reverse proxy, VPN).
 - Gli indicatori analizzati vengono inviati a servizi di terze parti e salvati nel database locale: valutare la riservatezza dei dati prima di analizzare indicatori legati a indagini in corso.
 - Rispettare i termini d'uso e i limiti di richieste di ciascun servizio.
+- **Uso lecito**: lo strumento è destinato ad attività autorizzate (threat intelligence, incident response, indagini svolte nel rispetto della normativa). Le ricerche su persone (email, telefono, account) trattano dati personali: l'utilizzatore è responsabile della base giuridica del trattamento e del rispetto del GDPR e delle norme applicabili. Non usarlo per profilare o monitorare persone senza titolo.
 
 ## Sviluppo
 
@@ -146,7 +147,7 @@ pnpm --filter @workspace/intel-app run build    # build del frontend
 pnpm --filter @workspace/api-server run build   # build del backend (dist/index.cjs)
 ```
 
-Il progetto è nato su [Replit](https://replit.com) e funziona sia lì (`replit.md`, `.replit`) sia in locale.
+Il progetto è nato su [Replit](https://replit.com); i file di configurazione specifici di Replit sono stati rimossi e il progetto si esegue in locale come descritto sopra.
 
 ## Licenza
 
